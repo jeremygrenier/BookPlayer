@@ -28,6 +28,7 @@ public struct SimpleLibraryItem: Hashable, Identifiable {
   public let originalFileName: String
   public let lastPlayDate: Date?
   public let type: SimpleItemType
+  public let source: SimpleItemSource
 
   public var progress: Double {
     if type == .folder,
@@ -62,6 +63,7 @@ public struct SimpleLibraryItem: Hashable, Identifiable {
     "originalFileName",
     "lastPlayDate",
     "type",
+    "source",
   ]
 
   public func hash(into hasher: inout Hasher) {
@@ -70,6 +72,7 @@ public struct SimpleLibraryItem: Hashable, Identifiable {
     hasher.combine(details)
     hasher.combine(percentCompleted)
     hasher.combine(type.rawValue)
+    hasher.combine(source.rawValue)
   }
 
   public init(
@@ -87,7 +90,8 @@ public struct SimpleLibraryItem: Hashable, Identifiable {
     parentFolder: String?,
     originalFileName: String,
     lastPlayDate: Date?,
-    type: SimpleItemType
+    type: SimpleItemType,
+    source: SimpleItemSource = .local
   ) {
     self.title = title
     self.details = details
@@ -105,6 +109,7 @@ public struct SimpleLibraryItem: Hashable, Identifiable {
     self.originalFileName = originalFileName
     self.lastPlayDate = lastPlayDate
     self.type = type
+    self.source = source
   }
 }
 
@@ -134,5 +139,7 @@ extension SimpleLibraryItem {
     case .book:
       self.type = .book
     }
+    
+    self.source = item.source.simpleSource
   }
 }

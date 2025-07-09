@@ -300,7 +300,9 @@ public final class LibraryService: LibraryServiceProtocol, @unchecked Sendable {
         let orderRank = dictionary["orderRank"] as? Int16,
         let originalFileName = dictionary["originalFileName"] as? String,
         let rawType = dictionary["type"] as? Int16,
-        let type = SimpleItemType(rawValue: rawType)
+        let type = SimpleItemType(rawValue: rawType),
+        let rawSource = dictionary["source"] as? Int16,
+        let source = SimpleItemSource(rawValue: rawSource)
       else { return nil }
 
       /// Patch for optional CoreData properties until we migrate to Realm
@@ -326,7 +328,8 @@ public final class LibraryService: LibraryServiceProtocol, @unchecked Sendable {
         parentFolder: dictionary["folder.relativePath"] as? String,
         originalFileName: originalFileName,
         lastPlayDate: dictionary["lastPlayDate"] as? Date,
-        type: type
+        type: type,
+        source: source
       )
     })
   }

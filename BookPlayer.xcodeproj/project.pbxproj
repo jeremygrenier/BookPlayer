@@ -26,6 +26,16 @@
 		3F7B64492E0FB2C100299D97 /* InsertUserBookData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F7B64482E0FB2C100299D97 /* InsertUserBookData.swift */; };
 		3FA43BF82E110B4900DF9B1F /* SimpleHardcoverBook.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FA43BF72E110B4400DF9B1F /* SimpleHardcoverBook.swift */; };
 		3FA43BF92E110B4900DF9B1F /* SimpleHardcoverBook.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FA43BF72E110B4400DF9B1F /* SimpleHardcoverBook.swift */; };
+		3FB35DC62E1C48D0008234E7 /* ItemSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FB35DC52E1C48D0008234E7 /* ItemSource.swift */; };
+		3FB35DC72E1C48D0008234E7 /* ItemSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FB35DC52E1C48D0008234E7 /* ItemSource.swift */; };
+		3FB35DC92E1C48FB008234E7 /* SimpleItemSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FB35DC82E1C48FB008234E7 /* SimpleItemSource.swift */; };
+		3FB35DCA2E1C48FB008234E7 /* SimpleItemSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FB35DC82E1C48FB008234E7 /* SimpleItemSource.swift */; };
+		3FB35DD42E1C4B07008234E7 /* MappingModel_v10_to_v11.xcmappingmodel in Sources */ = {isa = PBXBuildFile; fileRef = 3FB35DD32E1C4B07008234E7 /* MappingModel_v10_to_v11.xcmappingmodel */; };
+		3FB35DD52E1C4B07008234E7 /* MappingModel_v10_to_v11.xcmappingmodel in Sources */ = {isa = PBXBuildFile; fileRef = 3FB35DD32E1C4B07008234E7 /* MappingModel_v10_to_v11.xcmappingmodel */; };
+		3FB35DD62E1C4B07008234E7 /* MappingModel_v10_to_v11.xcmappingmodel in Sources */ = {isa = PBXBuildFile; fileRef = 3FB35DD32E1C4B07008234E7 /* MappingModel_v10_to_v11.xcmappingmodel */; };
+		3FB35DD72E1C4B07008234E7 /* MappingModel_v10_to_v11.xcmappingmodel in Sources */ = {isa = PBXBuildFile; fileRef = 3FB35DD32E1C4B07008234E7 /* MappingModel_v10_to_v11.xcmappingmodel */; };
+		3FB35DD82E1C4B07008234E7 /* MappingModel_v10_to_v11.xcmappingmodel in Sources */ = {isa = PBXBuildFile; fileRef = 3FB35DD32E1C4B07008234E7 /* MappingModel_v10_to_v11.xcmappingmodel */; };
+		3FB35DD92E1C4B07008234E7 /* MappingModel_v10_to_v11.xcmappingmodel in Sources */ = {isa = PBXBuildFile; fileRef = 3FB35DD32E1C4B07008234E7 /* MappingModel_v10_to_v11.xcmappingmodel */; };
 		3FF5BA662E10EA6F00B82BCC /* HardcoverBook+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FF5BA652E10EA5F00B82BCC /* HardcoverBook+CoreDataProperties.swift */; };
 		3FF5BA672E10EA6F00B82BCC /* HardcoverBook+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FF5BA652E10EA5F00B82BCC /* HardcoverBook+CoreDataProperties.swift */; };
 		3FF5BA692E10EA8000B82BCC /* HardcoverBook+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FF5BA682E10EA8000B82BCC /* HardcoverBook+CoreDataClass.swift */; };
@@ -908,6 +918,10 @@
 		3F7B64462E0FB2A900299D97 /* AudiobookEditionsData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudiobookEditionsData.swift; sourceTree = "<group>"; };
 		3F7B64482E0FB2C100299D97 /* InsertUserBookData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsertUserBookData.swift; sourceTree = "<group>"; };
 		3FA43BF72E110B4400DF9B1F /* SimpleHardcoverBook.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimpleHardcoverBook.swift; sourceTree = "<group>"; };
+		3FB35DC52E1C48D0008234E7 /* ItemSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ItemSource.swift; sourceTree = "<group>"; };
+		3FB35DC82E1C48FB008234E7 /* SimpleItemSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimpleItemSource.swift; sourceTree = "<group>"; };
+		3FB35DCB2E1C498D008234E7 /* Audiobook Player 11.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "Audiobook Player 11.xcdatamodel"; sourceTree = "<group>"; };
+		3FB35DD32E1C4B07008234E7 /* MappingModel_v10_to_v11.xcmappingmodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcmappingmodel; path = MappingModel_v10_to_v11.xcmappingmodel; sourceTree = "<group>"; };
 		3FF5BA652E10EA5F00B82BCC /* HardcoverBook+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "HardcoverBook+CoreDataProperties.swift"; sourceTree = "<group>"; };
 		3FF5BA682E10EA8000B82BCC /* HardcoverBook+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "HardcoverBook+CoreDataClass.swift"; sourceTree = "<group>"; };
 		3FF8EA3D2E11C7980054CD2C /* Audiobook Player 10.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "Audiobook Player 10.xcdatamodel"; sourceTree = "<group>"; };
@@ -2147,6 +2161,7 @@
 				41A359C2276232E00020D5F5 /* MappingModel_v7_to_v8.xcmappingmodel */,
 				9FF383D02A40F97000BBAC11 /* MappingModel_v8_to_v9.xcmappingmodel */,
 				3F66408C2E172DF500356522 /* MappingModel_v9_to_v10.xcmappingmodel */,
+				3FB35DD32E1C4B07008234E7 /* MappingModel_v10_to_v11.xcmappingmodel */,
 			);
 			path = Migrations;
 			sourceTree = "<group>";
@@ -2296,6 +2311,7 @@
 				9FBF33EB29F6293C00501639 /* SimpleBookmark.swift */,
 				9FFCC08E289418CA00F4952E /* SimpleChapter.swift */,
 				3FA43BF72E110B4400DF9B1F /* SimpleHardcoverBook.swift */,
+				3FB35DC82E1C48FB008234E7 /* SimpleItemSource.swift */,
 				41546FF226F559CE00825180 /* SimpleItemType.swift */,
 				41188D3026ED715D0017124E /* SimpleLibraryItem.swift */,
 				63398E3C2D68254000A6934E /* SimplePlaybackRecord.swift */,
@@ -2321,6 +2337,7 @@
 				41A1B11C226F88C500EA0400 /* Folder+CoreDataProperties.swift */,
 				3FF5BA682E10EA8000B82BCC /* HardcoverBook+CoreDataClass.swift */,
 				3FF5BA652E10EA5F00B82BCC /* HardcoverBook+CoreDataProperties.swift */,
+				3FB35DC52E1C48D0008234E7 /* ItemSource.swift */,
 				41A90C4427563F5A00C30394 /* ItemType.swift */,
 				41A1B119226F88C500EA0400 /* Library+CoreDataClass.swift */,
 				41A1B11A226F88C500EA0400 /* Library+CoreDataProperties.swift */,
@@ -3767,6 +3784,7 @@
 				6334CF1F2CFAD1B700F1FA17 /* RemoteItemCellViewModel.swift in Sources */,
 				9FA334B927C1B8450064E8EA /* NowPlayingTitleView.swift in Sources */,
 				4645F9FD2D1E46AC00A04257 /* SwipeInlineTip.swift in Sources */,
+				3FB35DD82E1C4B07008234E7 /* MappingModel_v10_to_v11.xcmappingmodel in Sources */,
 				6350E4692CF425500077CDC1 /* WidgetReloadService.swift in Sources */,
 				9FA334B327C156CB0064E8EA /* NowPlayingView.swift in Sources */,
 				9FA334C527C285650064E8EA /* ChapterListView.swift in Sources */,
@@ -3837,10 +3855,12 @@
 				62CADBAF2725FE2C00A4A98F /* ArtworkService.swift in Sources */,
 				4140EA80227289D50009F794 /* Folder+CoreDataClass.swift in Sources */,
 				9F7B64782803B0B000895ECC /* AccountService.swift in Sources */,
+				3FB35DCA2E1C48FB008234E7 /* SimpleItemSource.swift in Sources */,
 				4140EA78227289BC0009F794 /* PlaybackRecord+CoreDataClass.swift in Sources */,
 				4140EA79227289BF0009F794 /* PlaybackRecord+CoreDataProperties.swift in Sources */,
 				639AC98A2AD9F1D50053AFC6 /* BPDownloadURLSession.swift in Sources */,
 				63CD851F2CE2EEE200EDBEA8 /* Fonts.swift in Sources */,
+				3FB35DD42E1C4B07008234E7 /* MappingModel_v10_to_v11.xcmappingmodel in Sources */,
 				41A90C4927564DAA00C30394 /* BookPlayerError.swift in Sources */,
 				3FF5BA6A2E10EA8000B82BCC /* HardcoverBook+CoreDataClass.swift in Sources */,
 				41C23402272E1960006BC7B8 /* SimpleTheme.swift in Sources */,
@@ -3863,6 +3883,7 @@
 				9FC1E45A2814E0B000522FA8 /* NetworkUtils.swift in Sources */,
 				9F2DC9E62A014BB5006CDF1F /* PricingModel.swift in Sources */,
 				630826082AF54BB1002ACE0D /* Spacing.swift in Sources */,
+				3FB35DC62E1C48D0008234E7 /* ItemSource.swift in Sources */,
 				41C23404272E1966006BC7B8 /* PlaybackState.swift in Sources */,
 				4138CE1426E554320014F11E /* Bookmark+CoreDataProperties.swift in Sources */,
 				6356F9CD2AC8A1CE00B7A027 /* DatabaseInitializer.swift in Sources */,
@@ -3949,6 +3970,7 @@
 				416A29AA2569658100605395 /* BookPlayerWidgets.swift in Sources */,
 				630826052AF522FF002ACE0D /* RectangularView.swift in Sources */,
 				41D20DB425D5F5A100AAEE30 /* MappingModel_v1_to_v2.xcmappingmodel in Sources */,
+				3FB35DD72E1C4B07008234E7 /* MappingModel_v10_to_v11.xcmappingmodel in Sources */,
 				410641282579AA2F008EB8D0 /* TimeListenedWidgetView.swift in Sources */,
 				6309F1272B0CF658002B86A4 /* BookPlaybackToggleIntent.swift in Sources */,
 				630826032AF5225F002ACE0D /* CircularView.swift in Sources */,
@@ -4056,6 +4078,7 @@
 				636086012C5B3EB400341D78 /* CustomRewindIntent.swift in Sources */,
 				9F5011F92A6580800075FEBA /* ShakeMotionService.swift in Sources */,
 				634BA5932C160B890015314D /* LoadingBar.swift in Sources */,
+				3FB35DD92E1C4B07008234E7 /* MappingModel_v10_to_v11.xcmappingmodel in Sources */,
 				9F64C6242793C3DA00B2493C /* PlayerControlsViewModel.swift in Sources */,
 				6356F9B52AC7CC5600B7A027 /* CancelSleepTimerIntent.swift in Sources */,
 				6356F9C12AC823EE00B7A027 /* LastBookStartPlaybackIntent.swift in Sources */,
@@ -4286,12 +4309,14 @@
 				4138CE1626E584B60014F11E /* BookmarkType.swift in Sources */,
 				63125D0E2C36D84E00D35533 /* EventsAPI.swift in Sources */,
 				412AB7092701421600969618 /* ManualOrderMigrationUtils.swift in Sources */,
+				3FB35DC72E1C48D0008234E7 /* ItemSource.swift in Sources */,
 				9F1345B82938DF360089B1DE /* UIFont+BookPlayer.swift in Sources */,
 				639AC98C2AD9F2840053AFC6 /* BPTaskDownloadDelegate.swift in Sources */,
 				9FFCC08F289418CA00F4952E /* SimpleChapter.swift in Sources */,
 				416AAC3423F515AF005AD04F /* String+BookPlayer.swift in Sources */,
 				9FBDBC792879409600D315A2 /* SyncableItem.swift in Sources */,
 				62AAE22E274AA6DE001EB9FF /* LibraryService.swift in Sources */,
+				3FB35DD62E1C4B07008234E7 /* MappingModel_v10_to_v11.xcmappingmodel in Sources */,
 				9F2DC9E52A014BB5006CDF1F /* PricingModel.swift in Sources */,
 				41A1B126226F88C500EA0400 /* LibraryItem+CoreDataProperties.swift in Sources */,
 				6327E0C62ADB9913004780DC /* DownloadState.swift in Sources */,
@@ -4313,6 +4338,7 @@
 				9FDDD2DE289BEE590020C428 /* SyncJobScheduler.swift in Sources */,
 				41A8942A2652A7DF0032E972 /* Bundle+BookPlayer.swift in Sources */,
 				41A1B0F2226E9D1200EA0400 /* BookPlayer.xcdatamodeld in Sources */,
+				3FB35DC92E1C48FB008234E7 /* SimpleItemSource.swift in Sources */,
 				3F66408D2E172DF500356522 /* MappingModel_v9_to_v10.xcmappingmodel in Sources */,
 				41A359C5276232E00020D5F5 /* MappingModel_v7_to_v8.xcmappingmodel in Sources */,
 				41A1B125226F88C500EA0400 /* LibraryItem+CoreDataClass.swift in Sources */,
@@ -4397,6 +4423,7 @@
 				6340D5692AF12D48003D0B09 /* SharedWidget.swift in Sources */,
 				63005A2D2AE7FD8000A4CA2C /* Intents.intentdefinition in Sources */,
 				630825FE2AF293DC002ACE0D /* SharedWidgetContainerView.swift in Sources */,
+				3FB35DD52E1C4B07008234E7 /* MappingModel_v10_to_v11.xcmappingmodel in Sources */,
 				630825FC2AF2923B002ACE0D /* WidgetUtils.swift in Sources */,
 				630826122AF6CA45002ACE0D /* SharedIconWidget.swift in Sources */,
 				3F66408E2E172DF500356522 /* MappingModel_v9_to_v10.xcmappingmodel in Sources */,
@@ -6110,6 +6137,7 @@
 		4165EDF920A743D500616EDF /* BookPlayer.xcdatamodeld */ = {
 			isa = XCVersionGroup;
 			children = (
+				3FB35DCB2E1C498D008234E7 /* Audiobook Player 11.xcdatamodel */,
 				3FF8EA3D2E11C7980054CD2C /* Audiobook Player 10.xcdatamodel */,
 				9F7B646F28031E9300895ECC /* Audiobook Player 9.xcdatamodel */,
 				624EB9832755D8E700D462A8 /* Audiobook Player 8.xcdatamodel */,
@@ -6121,7 +6149,7 @@
 				41D20DAD25D5F0CA00AAEE30 /* Audiobook Player 2.xcdatamodel */,
 				4165EDFA20A743D500616EDF /* Audiobook Player.xcdatamodel */,
 			);
-			currentVersion = 3FF8EA3D2E11C7980054CD2C /* Audiobook Player 10.xcdatamodel */;
+			currentVersion = 3FB35DCB2E1C498D008234E7 /* Audiobook Player 11.xcdatamodel */;
 			path = BookPlayer.xcdatamodeld;
 			sourceTree = "<group>";
 			versionGroupType = wrapper.xcdatamodel;
