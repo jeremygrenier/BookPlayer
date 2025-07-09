@@ -49,6 +49,7 @@ class ItemListViewModel: ViewModelProtocol {
   let singleFileDownloadService: SingleFileDownloadService
   let libraryService: LibraryServiceProtocol
   let playbackService: PlaybackServiceProtocol
+  let fileDownloadService: FileDownloadService
   private let listRefreshService: ListSyncRefreshService
   let syncService: SyncServiceProtocol
   private let importManager: ImportManager
@@ -95,6 +96,7 @@ class ItemListViewModel: ViewModelProtocol {
     self.importManager = importManager
     self.listRefreshService = listRefreshService
     self.hardcoverService = hardcoverService
+    self.fileDownloadService = FileDownloadService(libraryService: libraryService)
     self.defaultArtwork = ArtworkService.generateDefaultArtwork(from: themeAccent)?.pngData()
 
     if let folderRelativePath {
@@ -234,6 +236,28 @@ class ItemListViewModel: ViewModelProtocol {
   }
   
   func bindDownloadObservers() {
+    fileDownloadService.eventPublisher
+      .sink { [weak self] (id, event) in
+        guard
+          let self,
+          let row = items.firstIndex(where: { $0.id ==  id })
+        else { return }
+
+        let index = IndexPath(row: row, section: 0)
+
+        switch event {
+        case .starting:
+          self.sendEvent(.downloadState(.downloading(progress: 0.0), indexPath: index))
+        case .progress(let progress):
+          self.sendEvent(.downloadState(.downloading(progress: progress), indexPath: index))
+        case .finished:
+          self.sendEvent(.downloadState(.downloaded, indexPath: index))
+        case .error:
+          self.sendEvent(.downloadState(.notDownloaded, indexPath: index))
+        }
+      }
+      .store(in: &disposeBag)
+
     syncService.downloadCompletedPublisher
       .filter({ [weak self] in
         $0.1 == self?.folderRelativePath || $0.2 == self?.folderRelativePath
@@ -409,18 +433,22 @@ class ItemListViewModel: ViewModelProtocol {
   }
 
   func handleArtworkTap(for item: SimpleLibraryItem) {
-    switch getDownloadState(for: item) {
-    case .notDownloaded:
-      startDownload(of: item)
-    case .downloading:
-      cancelDownload(of: item)
-    case .downloaded:
-      switch item.type {
-      case .folder:
-        playNextBook(in: item)
-      case .bound, .book:
-        onTransition?(.loadPlayer(relativePath: item.relativePath))
+    if item.source == .local {
+      switch getDownloadState(for: item) {
+      case .notDownloaded:
+        startDownload(of: item)
+      case .downloading:
+        cancelDownload(of: item)
+      case .downloaded:
+        switch item.type {
+        case .folder:
+          playNextBook(in: item)
+        case .bound, .book:
+          onTransition?(.loadPlayer(relativePath: item.relativePath))
+        }
       }
+    } else {
+        fileDownloadService.download(item: item)
     }
   }
 
@@ -1277,8 +1305,41 @@ extension ItemListViewModel {
 
 // MARK: - Network related handlers
 extension ItemListViewModel {
+  /// Check if files exist for a SimpleLibraryItem based on its type
+  private func fileExists(for item: SimpleLibraryItem) -> Bool {
+    let destinationURL = DataManager.getProcessedFolderURL().appendingPathComponent(item.relativePath)
+    
+    switch item.type {
+    case .book:
+      return FileManager.default.fileExists(atPath: destinationURL.path)
+    case .folder:
+      return true
+    case .bound:
+      guard let children = libraryService.fetchContents(at: item.relativePath, limit: nil, offset: nil) else {
+        return false
+      }
+      
+      for childItem in children {
+        let childDestinationURL = DataManager.getProcessedFolderURL().appendingPathComponent(childItem.relativePath)
+        if !FileManager.default.fileExists(atPath: childDestinationURL.path) {
+          return false
+        }
+      }
+      
+      return true
+    }
+  }
+  
   func getDownloadState(for item: SimpleLibraryItem) -> DownloadState {
-    return syncService.getDownloadState(for: item)
+    if item.source == .local {
+      return syncService.getDownloadState(for: item)
+    } else {
+      if fileExists(for: item) {
+        return .downloaded
+      } else {
+        return .notDownloaded
+      }
+    }
   }
   /// Download files linked to an item
   /// Note: if the item is a bound book, this will start multiple downloads

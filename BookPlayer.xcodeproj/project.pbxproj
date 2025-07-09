@@ -16,6 +16,7 @@
 		3F6640912E172DF500356522 /* MappingModel_v9_to_v10.xcmappingmodel in Sources */ = {isa = PBXBuildFile; fileRef = 3F66408C2E172DF500356522 /* MappingModel_v9_to_v10.xcmappingmodel */; };
 		3F6640922E172DF500356522 /* MappingModel_v9_to_v10.xcmappingmodel in Sources */ = {isa = PBXBuildFile; fileRef = 3F66408C2E172DF500356522 /* MappingModel_v9_to_v10.xcmappingmodel */; };
 		3F6640942E17386400356522 /* DeleteUserBookData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F6640932E17386400356522 /* DeleteUserBookData.swift */; };
+		3F7A5ECA2E1E35D0009F3AA1 /* FileDownloadService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F7A5EC92E1E35D0009F3AA1 /* FileDownloadService.swift */; };
 		3F7B64362E0F71E900299D97 /* HardcoverSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F7B64352E0F71E900299D97 /* HardcoverSettingsView.swift */; };
 		3F7B64382E0F720B00299D97 /* HardcoverSettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F7B64372E0F720B00299D97 /* HardcoverSettingsViewModel.swift */; };
 		3F7B643B2E0F9FA000299D97 /* HardcoverService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F7B643A2E0F9F9400299D97 /* HardcoverService.swift */; };
@@ -909,6 +910,7 @@
 		3F6640892E162ABF00356522 /* AudioMetadataService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioMetadataService.swift; sourceTree = "<group>"; };
 		3F66408C2E172DF500356522 /* MappingModel_v9_to_v10.xcmappingmodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcmappingmodel; path = MappingModel_v9_to_v10.xcmappingmodel; sourceTree = "<group>"; };
 		3F6640932E17386400356522 /* DeleteUserBookData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeleteUserBookData.swift; sourceTree = "<group>"; };
+		3F7A5EC92E1E35D0009F3AA1 /* FileDownloadService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileDownloadService.swift; sourceTree = "<group>"; };
 		3F7B64352E0F71E900299D97 /* HardcoverSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HardcoverSettingsView.swift; sourceTree = "<group>"; };
 		3F7B64372E0F720B00299D97 /* HardcoverSettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HardcoverSettingsViewModel.swift; sourceTree = "<group>"; };
 		3F7B643A2E0F9F9400299D97 /* HardcoverService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HardcoverService.swift; sourceTree = "<group>"; };
@@ -2737,6 +2739,7 @@
 				4193E201243A91AE004D6A82 /* ActionParserService.swift */,
 				9F82DF9B27DFE46B001B0EA8 /* PhoneWatchConnectivityService.swift */,
 				63B50F042B692E4200BCABBA /* ListSyncRefreshService.swift */,
+				3F7A5EC92E1E35D0009F3AA1 /* FileDownloadService.swift */,
 				8A9D0D2F2CD0E06F007A924D /* SingleFileDownloadService.swift */,
 			);
 			path = Services;
@@ -4017,6 +4020,7 @@
 				4151A6B326E491A800E49DBE /* NibLoadableView.swift in Sources */,
 				4197FAFC267E480100811CC8 /* ImportViewController.swift in Sources */,
 				631C75C92AB92C540013E7E5 /* BPPushPresentationFlow.swift in Sources */,
+				3F7A5ECA2E1E35D0009F3AA1 /* FileDownloadService.swift in Sources */,
 				631C75CC2AB92FA60013E7E5 /* BPModalPresentationFlow.swift in Sources */,
 				9FF710AC2A212221006490E0 /* QueuedSyncTasksViewController.swift in Sources */,
 				9FEC87B227FA9F1C006C71D5 /* LoginViewModel.swift in Sources */,
