@@ -56,6 +56,7 @@ class ItemListViewModel: ViewModelProtocol {
   var offset = 0
 
   public private(set) var defaultArtwork: Data?
+  public let item: SimpleLibraryItem?
   public private(set) var items = [SimpleLibraryItem]()
 
   var eventsPublisher = InterfaceUpdater<ItemListViewModel.Events>()
@@ -95,6 +96,12 @@ class ItemListViewModel: ViewModelProtocol {
     self.listRefreshService = listRefreshService
     self.hardcoverService = hardcoverService
     self.defaultArtwork = ArtworkService.generateDefaultArtwork(from: themeAccent)?.pngData()
+
+    if let folderRelativePath {
+      self.item = libraryService.getSimpleItem(with: folderRelativePath)
+    } else {
+      self.item = nil
+    }
   }
 
   func getEmptyStateImageName() -> String {
@@ -104,16 +111,8 @@ class ItemListViewModel: ViewModelProtocol {
   }
 
   func getNavigationTitle() -> String {
-    guard let folderRelativePath = folderRelativePath else {
-      return "library_title".localized
-    }
-
-    /// Xcode Cloud is throwing an error on #keyPath(BookPlayerKit.LibraryItem.title)
-    return libraryService.getItemProperty(
-      "title",
-      relativePath: folderRelativePath
-    ) as? String
-    ?? ""
+    guard let item else { return "library_title".localized }
+    return item.title
   }
 
   func observeEvents() -> AnyPublisher<ItemListViewModel.Events, Never> {
@@ -633,7 +632,7 @@ class ItemListViewModel: ViewModelProtocol {
 
     let existingFolders = existingItems.filter({ $0.type == .folder })
 
-    for folder in existingFolders {
+    for folder in existingFolders where folder.source == .local {
       if items.contains(where: { $0.relativePath == folder.relativePath }) { continue }
 
       availableFolders.append(folder)
@@ -724,30 +723,38 @@ class ItemListViewModel: ViewModelProtocol {
           self?.onTransition?(.showItemDetails(item: item))
         }
       ),
-      BPActionItem(
-        title: "move_title".localized,
-        handler: { [weak self] in
-          guard let self = self else { return }
+    ]
 
-          self.showMoveOptions(
-            selectedItems: selectedItems,
-            availableFolders: self.getAvailableFolders(notIn: selectedItems)
-          )
-        }
-      ),
-      BPActionItem(
-        title: "export_button".localized,
-        handler: { [weak self] in
-          self?.onTransition?(.showExportController(items: selectedItems))
-        }
-      ),
+    if item.source == .local {
+      actions.append(contentsOf: [
+        BPActionItem(
+          title: "move_title".localized,
+          handler: { [weak self] in
+            guard let self = self else { return }
+
+            self.showMoveOptions(
+              selectedItems: selectedItems,
+              availableFolders: self.getAvailableFolders(notIn: selectedItems)
+            )
+          }
+        ),
+        BPActionItem(
+          title: "export_button".localized,
+          handler: { [weak self] in
+            self?.onTransition?(.showExportController(items: selectedItems))
+          }
+        ),
+      ])
+    }
+
+    actions.append(
       BPActionItem(
         title: "jump_start_title".localized,
         handler: { [weak self] in
           self?.handleResetPlaybackPosition(for: selectedItems)
         }
       )
-    ]
+    )
 
     let areFinished = selectedItems.filter({ !$0.isFinished }).isEmpty
     let markTitle = areFinished ? "mark_unfinished_title".localized : "mark_finished_title".localized
@@ -823,15 +830,18 @@ class ItemListViewModel: ViewModelProtocol {
       )
     }
 
-    actions.append(
-      BPActionItem(
-        title: "delete_button".localized,
-        style: .destructive,
-        handler: { [weak self] in
-          self?.showDeleteAlert(selectedItems: selectedItems)
-        }
+    if folderRelativePath == nil || item.source == .local {
+      actions.append(
+        BPActionItem(
+          title: "delete_button".localized,
+          style: .destructive,
+          handler: { [weak self] in
+            self?.showDeleteAlert(selectedItems: selectedItems)
+          }
+        )
       )
-    )
+    }
+
     actions.append(BPActionItem.cancelAction)
 
     sendEvent(.showAlert(

@@ -39,16 +39,8 @@ final class PlayerLoaderService: @unchecked Sendable {
   ) async throws {
     let fileURL = DataManager.getProcessedFolderURL().appendingPathComponent(relativePath)
 
-    if syncService.isActive == false,
-      !FileManager.default.fileExists(atPath: fileURL.path)
-    {
-      throw BPPlayerError.fileMissing(relativePath: relativePath)
-    }
-
     // Only load if loaded book is a different one
-    if playerManager.hasLoadedBook() == true,
-      relativePath == playerManager.currentItem?.relativePath
-    {
+    if playerManager.hasLoadedBook() == true, relativePath == playerManager.currentItem?.relativePath {
       if autoplay {
         playerManager.play()
       }
@@ -58,6 +50,14 @@ final class PlayerLoaderService: @unchecked Sendable {
     guard
       let libraryItem = self.libraryService.getSimpleItem(with: relativePath)
     else { return }
+
+    guard
+      libraryItem.remoteURL != nil ||
+      libraryItem.source != .local ||
+      FileManager.default.fileExists(atPath: fileURL.path)
+    else {
+      throw BPPlayerError.fileMissing(relativePath: relativePath)
+    }
 
     /// If the selected item is a bound book, check that the contents are loaded
     if syncService.isActive == true,

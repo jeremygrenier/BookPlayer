@@ -157,7 +157,12 @@ class ItemListViewController: UIViewController, MVVMControllerProtocol, Storyboa
 
     self.adjustBottomOffsetForMiniPlayer()
 
-    self.navigationItem.rightBarButtonItems = [addButton, searchButton]
+    if let source = viewModel.item?.source, source != .local {
+      self.navigationItem.rightBarButtonItems = [searchButton]
+      self.selectButton.isHidden = true
+    } else {
+      self.navigationItem.rightBarButtonItems = [addButton, searchButton]
+    }
 
     self.emptyStateImageView.image = UIImage(named: self.viewModel.getEmptyStateImageName())
 
@@ -399,7 +404,9 @@ class ItemListViewController: UIViewController, MVVMControllerProtocol, Storyboa
   func updateSelectionStatus() {
     guard self.tableView.isEditing else { return }
 
-    let title = self.tableView.numberOfRows(inSection: 0) > (self.tableView.indexPathsForSelectedRows?.count ?? 0)
+    let maxSelectedRows = viewModel.items.filter({ $0.source == .local }).count
+
+    let title = self.tableView.indexPathsForSelectedRows?.count != maxSelectedRows
     ? "select_all_title".localized
     : "deselect_all_title".localized
     self.selectAllButton.setTitle(title, for: .normal)
@@ -432,13 +439,14 @@ class ItemListViewController: UIViewController, MVVMControllerProtocol, Storyboa
   @objc func selectAllButtonPressed(_ sender: Any) {
     self.viewModel.loadAllItemsIfNeeded()
 
-    if self.tableView.numberOfRows(inSection: 0) == (self.tableView.indexPathsForSelectedRows?.count ?? 0) {
-      for row in 0..<self.tableView.numberOfRows(inSection: 0) {
-        self.tableView.deselectRow(at: IndexPath(row: row, section: 0), animated: true)
-      }
-    } else {
-      for row in 0..<self.tableView.numberOfRows(inSection: 0) {
+    let maxSelectedRows = viewModel.items.filter({ $0.source == .local }).count
+    let shouldSelect = self.tableView.indexPathsForSelectedRows?.count != maxSelectedRows
+
+    for row in 0..<self.tableView.numberOfRows(inSection: 0) where viewModel.items[row].source == .local {
+      if shouldSelect {
         self.tableView.selectRow(at: IndexPath(row: row, section: 0), animated: true, scrollPosition: .none)
+      } else {
+        self.tableView.deselectRow(at: IndexPath(row: row, section: 0), animated: true)
       }
     }
 
@@ -509,7 +517,7 @@ extension ItemListViewController: UITableViewDelegate {
   // MARK: reordering support
 
   func tableView(_ tableView: UITableView, canMoveRowAt indexPath: IndexPath) -> Bool {
-    return true
+    return self.viewModel.items[indexPath.row].source == .local
   }
 
   func tableView(_ tableView: UITableView, moveRowAt sourceIndexPath: IndexPath, to destinationIndexPath: IndexPath) {
@@ -524,7 +532,8 @@ extension ItemListViewController: UITableViewDelegate {
   // MARK: editing support
 
   func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
-    return true
+    guard tableView.isEditing else { return true }
+    return self.viewModel.items[indexPath.row].source == .local
   }
 
   func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
@@ -541,6 +550,7 @@ extension ItemListViewController: UITableViewDelegate {
   }
 
   func tableView(_ tableView: UITableView, willSelectRowAt indexPath: IndexPath) -> IndexPath? {
+    guard !tableView.isEditing || self.viewModel.items[indexPath.row].source == .local else { return nil }
     return indexPath
   }
 
@@ -561,6 +571,10 @@ extension ItemListViewController: UITableViewDelegate {
 
     navigationItem.backButtonDisplayMode = .default
     self.viewModel.showItemContents(item)
+  }
+
+  func tableView(_ tableView: UITableView, shouldBeginMultipleSelectionInteractionAt indexPath: IndexPath) -> Bool {
+    self.viewModel.items[indexPath.row].source == .local
   }
 
   func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
