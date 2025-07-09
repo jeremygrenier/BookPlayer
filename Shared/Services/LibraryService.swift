@@ -32,6 +32,8 @@ public protocol LibraryServiceProtocol: AnyObject {
   func setLibraryLastBook(with relativePath: String?)
   /// Import and insert items
   func insertItems(from files: [URL]) -> [SimpleLibraryItem]
+  /// Store library hierarchy from SimpleLibraryItem.Node tree to CoreData entities (more efficient than array approach)
+  func storeLibraryHierarchy(_ root: SimpleLibraryItem.Node) throws
   /// Move items between folders
   func moveItems(_ items: [String], inside relativePath: String?) throws
   /// Delete items
@@ -1926,6 +1928,149 @@ extension LibraryService {
       status: status,
       userBookID: userBookID != 0 ? Int(userBookID) : nil
     )
+  }
+}
+
+// MARK: - Jellyfin operations
+extension LibraryService {
+  public func storeLibraryHierarchy(_ root: SimpleLibraryItem.Node) throws {
+    let context = dataManager.getContext()
+
+    print("storeLibraryHierarchy: Starting with root node")
+
+    let fetchRequest: NSFetchRequest<LibraryItem> = LibraryItem.fetchRequest()
+    fetchRequest.predicate = NSPredicate(format: "source == %d", root.item.source.rawValue)
+    let existingItems = try context.fetch(fetchRequest)
+
+    let existingItemsByPath = Dictionary(uniqueKeysWithValues: existingItems.map { ($0.relativePath!, $0) })
+    print("storeLibraryHierarchy: Found \(existingItems.count) existing items")
+
+    let library = getLibraryReference(context: context)
+
+    let processedPaths = try processHierarchyNode(
+      root,
+      parent: nil,
+      library: library,
+      existingItems: existingItemsByPath,
+      context: context
+    )
+
+    let itemsToRemove = existingItems.filter { !processedPaths.contains($0.relativePath!) }
+    for item in itemsToRemove {
+      print("storeLibraryHierarchy: Removing item no longer in sync: \(item.relativePath!)")
+      context.delete(item)
+    }
+
+    print("storeLibraryHierarchy: Processed \(processedPaths.count) items, saving context...")
+
+    dataManager.saveContext()
+    print("storeLibraryHierarchy: Context saved successfully")
+  }
+
+  private func processHierarchyNode(
+    _ node: SimpleLibraryItem.Node,
+    parent: LibraryItem?,
+    library: Library,
+    existingItems: [String: LibraryItem],
+    context: NSManagedObjectContext
+  ) throws -> Set<String> {
+    let item = node.item
+    var processedPaths = Set<String>()
+
+    let libraryItem: LibraryItem
+
+    if let existingItem = existingItems[item.relativePath] {
+      libraryItem = try updateLibraryItem(existingItem, from: item)
+      print("storeLibraryHierarchy: Updated existing item: \(libraryItem.relativePath!)")
+    } else {
+      libraryItem = try createLibraryItemFromHierarchy(from: item, parent: parent, library: library, context: context)
+      print("storeLibraryHierarchy: Created new item: \(libraryItem.relativePath!)")
+    }
+
+    processedPaths.insert(item.relativePath)
+
+    for childNode in node.children {
+      let childPaths = try processHierarchyNode(
+        childNode,
+        parent: libraryItem,
+        library: library,
+        existingItems: existingItems,
+        context: context
+      )
+      processedPaths.formUnion(childPaths)
+    }
+    
+    return processedPaths
+  }
+
+  private func createLibraryItemFromHierarchy(
+    from item: SimpleLibraryItem,
+    parent: LibraryItem?,
+    library: Library,
+    context: NSManagedObjectContext
+  ) throws -> LibraryItem {
+    print("createLibraryItemFromHierarchy: Creating \(item.type) - \(item.title) at \(item.relativePath)")
+
+    switch item.type {
+    case .folder, .bound:
+      let newFolder = Folder(title: item.title, context: context)
+      newFolder.relativePath = item.relativePath
+      newFolder.details = item.details
+      newFolder.duration = item.duration
+      newFolder.originalFileName = item.originalFileName
+      newFolder.type = item.type.itemType
+      newFolder.source = item.source.itemSource
+      newFolder.orderRank = item.orderRank
+      newFolder.artworkURL = item.artworkURL
+
+      if let parent = parent as? Folder {
+        parent.addToItems(newFolder)
+      } else {
+        library.addToItems(newFolder)
+      }
+
+      return newFolder
+
+    case .book:
+      guard let remoteURL = item.remoteURL else {
+        throw BookPlayerError.runtimeError("Book item missing remote URL: \(item.relativePath)")
+      }
+
+      let book = Book(context: context)
+      book.relativePath = item.relativePath
+      book.title = item.title
+      book.details = item.details
+      book.duration = item.duration
+      book.originalFileName = item.originalFileName
+      book.type = .book
+      book.remoteURL = remoteURL
+      book.source = item.source.itemSource
+      book.orderRank = item.orderRank
+      book.artworkURL = item.artworkURL
+
+      if let parent = parent as? Folder {
+        parent.addToItems(book)
+      } else {
+        library.addToItems(book)
+      }
+
+      return book
+    }
+  }
+
+  private func updateLibraryItem(_ existingItem: LibraryItem, from item: SimpleLibraryItem) throws -> LibraryItem {
+    print("updateLibraryItem: Updating \(item.type) - \(item.title) at \(item.relativePath)")
+
+    existingItem.title = item.title
+    existingItem.details = item.details
+    existingItem.duration = item.duration
+    existingItem.source = item.source.itemSource
+    existingItem.remoteURL = item.remoteURL
+    if existingItem.artworkURL == nil {
+      existingItem.artworkURL = item.remoteURL
+    }
+
+    return existingItem
   }
 }
 // swiftlint:enable force_cast

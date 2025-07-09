@@ -143,3 +143,15 @@ extension SimpleLibraryItem {
     self.source = item.source.simpleSource
   }
 }
+
+extension SimpleLibraryItem {
+  public struct Node {
+    public let item: SimpleLibraryItem
+    public let children: [Node]
+
+    public init(item: SimpleLibraryItem, children: [Node] = []) {
+      self.item = item
+      self.children = children
+    }
+  }
+}

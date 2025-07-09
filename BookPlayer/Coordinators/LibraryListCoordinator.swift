@@ -131,6 +131,14 @@ class LibraryListCoordinator: ItemListCoordinator, UINavigationControllerDelegat
         ActionParserService.handleAction(action)
       }
     }
+
+    let jellyfinConnectionService = JellyfinConnectionService(keychainService: KeychainService())
+    Task { @MainActor in
+      if let root = try await jellyfinConnectionService.buildLibraryHierarchy() {
+        try libraryService.storeLibraryHierarchy(root)
+        self.reloadItemsWithPadding()
+      }
+    }
   }
 
   func showSecondOnboarding() {

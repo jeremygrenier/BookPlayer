@@ -96,21 +96,15 @@ class JellyfinConnectionService: BPLogger, ObservableObject {
       throw JellyfinError.noClient
     }
 
-    let parameters = Paths.GetUserViewsParameters(userID: connection.userID)
+    let parameters = Paths.GetUserViewsParameters(userID: connection.userID, presetViews: [.books])
 
     let response = try await send(Paths.getUserViews(parameters: parameters))
 
     try Task.checkCancellation()
 
-    let userViews = (response.value.items ?? [])
-      .compactMap { userView -> JellyfinLibraryItem? in
-        guard userView.collectionType == .books else {
-          return nil
-        }
-        return JellyfinLibraryItem(apiItem: userView)
-      }
+    let userViews = response.value.items?.compactMap(JellyfinLibraryItem.init(apiItem:))
 
-    return userViews
+    return userViews ?? []
   }
 
   public func fetchItems(
@@ -322,3 +316,308 @@ class JellyfinConnectionService: BPLogger, ObservableObject {
     return components
   }
 }
+
+// MARK: - Library
+extension JellyfinConnectionService {
+  public func buildLibraryHierarchy() async throws -> SimpleLibraryItem.Node? {
+    guard let serverName = connection?.serverName else { return nil }
+
+    let items = try await fetchLibrary()
+    Self.logger.info("Fetched \(items.count) audiobook items from Jellyfin")
+    
+    let artistHierarchy = buildArtistAlbumHierarchy(from: items, serverName: serverName)
+    Self.logger.info("Built Artist->Album hierarchy with \(artistHierarchy.count) artists")
+    
+    let totalDuration = items.reduce(0.0) { sum, book in
+      guard let time = book.runTimeTicks else { return sum }
+      return sum + TimeInterval(time) / 10_000_000.0
+    }
+    
+    let rootItem = SimpleLibraryItem(
+      title: "Jellyfin (\(serverName))",
+      details: "\(artistHierarchy.count) artists",
+      speed: 1.0,
+      currentTime: 0.0,
+      duration: totalDuration,
+      percentCompleted: 0.0,
+      isFinished: false,
+      relativePath: "Jellyfin (\(serverName))".replacingOccurrences(of: "/", with: "_"),
+      remoteURL: nil,
+      artworkURL: nil,
+      orderRank: 0,
+      parentFolder: nil,
+      originalFileName: "Jellyfin (\(serverName))".replacingOccurrences(of: "/", with: "_"),
+      lastPlayDate: nil,
+      type: .folder,
+      source: .jellyfin
+    )
+
+    return SimpleLibraryItem.Node(item: rootItem, children: artistHierarchy)
+  }
+
+  private func fetchLibrary() async throws -> [BaseItemDto] {
+    let parameters = Paths.GetItemsParameters(
+      isRecursive: true,
+      sortOrder: [.descending, .ascending],
+      fields: [.parentID, .path],
+      includeItemTypes: [.audioBook],
+      sortBy: [.albumArtist, .album],
+      enableUserData: false,
+      imageTypeLimit: 1
+    )
+
+    let response = try await send(Paths.getItems(parameters: parameters))
+    try Task.checkCancellation()
+
+    return response.value.items ?? []
+  }
+
+  private func buildArtistAlbumHierarchy(from items: [BaseItemDto], serverName: String) -> [SimpleLibraryItem.Node] {
+    let audiobooks = parseAudiobookItems(from: items)
+    let groupedByArtist = Dictionary(grouping: audiobooks, by: \.artist)
+
+    let sortedArtists = groupedByArtist.keys.sorted(by: { $0.localizedStandardCompare($1) == .orderedAscending })
+
+    var artistNodes: [SimpleLibraryItem.Node] = []
+    for (index, artistName) in sortedArtists.enumerated() {
+      guard let audiobooks = groupedByArtist[artistName] else { continue }
+      let artistNode = buildArtistNode(
+        artistName: artistName,
+        rank: index,
+        audiobooks: audiobooks,
+        serverName: "Jellyfin (\(serverName))"
+      )
+      artistNodes.append(artistNode)
+    }
+
+    return artistNodes
+  }
+  
+  private func parseAudiobookItems(from items: [BaseItemDto]) -> [AudiobookItem] {
+    return items.compactMap { item -> AudiobookItem? in
+      guard
+        let id = item.id,
+        let name = item.name,
+        let artist = item.albumArtist,
+        let album = item.album,
+        let fileName = item.path.map(URL.init(fileURLWithPath:))?.lastPathComponent,
+        let duration = item.runTimeTicks.map({ TimeInterval($0) / 10_000_000.0 })
+      else {
+        Self.logger.warning(
+          """
+          Skipping item with missing required fields:
+            id=\(item.id ?? "nil"),
+            name=\(item.name ?? "nil"),
+            albumArtist=\(item.albumArtist ?? "nil"),
+            album=\(item.album ?? "nil"),
+            path=\(item.path ?? "nil")
+          """
+        )
+        return nil
+      }
+
+      return AudiobookItem(
+        id: id,
+        name: name,
+        artist: artist,
+        album: album,
+        fileName: fileName,
+        duration: duration
+      )
+    }
+  }
+  
+  private func buildArtistNode(
+    artistName: String,
+    rank: Int,
+    audiobooks: [AudiobookItem],
+    serverName: String
+  ) -> SimpleLibraryItem.Node {
+    let groupedByAlbum = Dictionary(grouping: audiobooks, by: \.album)
+    let bookNodes = buildBookNodes(
+      groupedByAlbum: groupedByAlbum,
+      artistName: artistName,
+      serverName: serverName
+    )
+    
+    let totalArtistDuration = audiobooks.reduce(0.0) { $0 + $1.duration }
+    let artistPath = URL(fileURLWithPath: serverName).appendingPathComponent(artistName).path
+
+    let artistItem = SimpleLibraryItem(
+      title: artistName,
+      details: "\(bookNodes.count) books",
+      speed: 1.0,
+      currentTime: 0.0,
+      duration: totalArtistDuration,
+      percentCompleted: 0.0,
+      isFinished: false,
+      relativePath: artistPath,
+      remoteURL: nil,
+      artworkURL: nil,
+      orderRank: Int16(rank),
+      parentFolder: serverName,
+      originalFileName: artistName,
+      lastPlayDate: nil,
+      type: .folder,
+      source: .jellyfin
+    )
+    
+    return SimpleLibraryItem.Node(item: artistItem, children: bookNodes)
+  }
+  
+  private func buildBookNodes(
+    groupedByAlbum: [String: [AudiobookItem]],
+    artistName: String,
+    serverName: String
+  ) -> [SimpleLibraryItem.Node] {
+    var bookNodes: [SimpleLibraryItem.Node] = []
+
+    for (bookName, audiobooks) in groupedByAlbum {
+      let parentURL = URL(fileURLWithPath: serverName).appendingPathComponent(artistName)
+
+      let bookNode: SimpleLibraryItem.Node
+
+      if audiobooks.count == 1 {
+        bookNode = buildSingleBookNode(audiobook: audiobooks[0], parentURL: parentURL)
+      } else {
+        bookNode = buildMultiPartBookNode(
+          bookName: bookName,
+          audiobooks: audiobooks,
+          parentURL: parentURL
+        )
+      }
+      
+      bookNodes.append(bookNode)
+    }
+    
+    return bookNodes
+  }
+  
+  private func buildSingleBookNode(audiobook: AudiobookItem, parentURL: URL) -> SimpleLibraryItem.Node {
+    let bookItem = SimpleLibraryItem(
+      title: audiobook.name,
+      details: audiobook.artist,
+      speed: 1.0,
+      currentTime: 0.0,
+      duration: audiobook.duration,
+      percentCompleted: 0.0,
+      isFinished: false,
+      relativePath: parentURL.appendingPathComponent(audiobook.fileName).path,
+      remoteURL: try? getItemStreamingURL(itemID: audiobook.id),
+      artworkURL: nil,
+      orderRank: 0,
+      parentFolder: parentURL.path,
+      originalFileName: audiobook.fileName,
+      lastPlayDate: nil,
+      type: .book,
+      source: .jellyfin
+    )
+    
+    return SimpleLibraryItem.Node(item: bookItem)
+  }
+  
+  private func buildMultiPartBookNode(bookName: String, audiobooks: [AudiobookItem], parentURL: URL) -> SimpleLibraryItem.Node {
+    let totalDuration = audiobooks.reduce(0.0) { $0 + $1.duration }
+
+    let bookURL = parentURL.appendingPathComponent(bookName)
+
+    let chapterNodes = buildChapterNodes(audiobooks: audiobooks, bookURL: bookURL)
+
+    let bookItem = SimpleLibraryItem(
+      title: bookName,
+      details: chapterNodes.first?.item.details ?? "",
+      speed: 1.0,
+      currentTime: 0.0,
+      duration: totalDuration,
+      percentCompleted: 0.0,
+      isFinished: false,
+      relativePath: bookURL.path,
+      remoteURL: nil,
+      artworkURL: chapterNodes.first?.item.artworkURL,
+      orderRank: 0,
+      parentFolder: parentURL.path,
+      originalFileName: bookName,
+      lastPlayDate: nil,
+      type: .bound,
+      source: .jellyfin
+    )
+    
+    return SimpleLibraryItem.Node(item: bookItem, children: chapterNodes)
+  }
+  
+  private func buildChapterNodes(audiobooks: [AudiobookItem], bookURL: URL) -> [SimpleLibraryItem.Node] {
+    let sorted = audiobooks.sorted { $0.fileName.localizedStandardCompare($1.fileName) == .orderedAscending }
+    var chapterNodes: [SimpleLibraryItem.Node] = []
+    var chapterOrderRank: Int16 = 0
+
+    for book in sorted {
+      let chapterURL = bookURL.appendingPathComponent(book.fileName)
+
+      let chapterItem = SimpleLibraryItem(
+        title: chapterURL.deletingPathExtension().lastPathComponent,
+        details: book.artist,
+        speed: 1.0,
+        currentTime: 0.0,
+        duration: book.duration,
+        percentCompleted: 0.0,
+        isFinished: false,
+        relativePath: chapterURL.path,
+        remoteURL: try? getItemStreamingURL(itemID: book.id),
+        artworkURL: try? getItemArtworkURL(itemID: book.id),
+        orderRank: chapterOrderRank,
+        parentFolder: bookURL.path,
+        originalFileName: book.fileName,
+        lastPlayDate: nil,
+        type: .book,
+        source: .jellyfin
+      )
+      
+      let chapter = SimpleLibraryItem.Node(item: chapterItem)
+      chapterNodes.append(chapter)
+      chapterOrderRank += 1
+    }
+    
+    return chapterNodes
+  }
+
+  private func getItemStreamingURL(itemID: String) throws -> URL? {
+    guard let apiKey = connection?.accessToken else { return nil }
+
+    let parameters = Paths.GetAudioStreamParameters(isStatic: true)
+    let request = Paths.getAudioStream(itemID: itemID, parameters: parameters)
+
+    let components = try createUrlComponentsForApiRequest(request)
+
+    guard let streamingURL = components.url else {
+      throw JellyfinError.urlFromComponents(components)
+    }
+
+    return streamingURL.appending(queryItems: [URLQueryItem(name: "api_key", value: apiKey)])
+  }
+
+  private func getItemArtworkURL(itemID: String) throws -> URL? {
+    guard let apiKey = connection?.accessToken else { return nil }
+
+    let request = Paths.getItemImage(itemID: itemID, imageType: "Primary")
+
+    let components = try createUrlComponentsForApiRequest(request)
+
+    guard let artworkURL = components.url else {
+      throw JellyfinError.urlFromComponents(components)
+    }
+
+    return artworkURL.appending(queryItems: [URLQueryItem(name: "api_key", value: apiKey)])
+  }
+}
+
+extension JellyfinConnectionService {
+  struct AudiobookItem {
+    let id: String
+    let name: String
+    let artist: String
+    let album: String
+    let fileName: String
+    let duration: TimeInterval
+  }
+}
+
